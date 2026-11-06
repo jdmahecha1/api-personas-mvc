@@ -1,147 +1,85 @@
-# API REST — Gestión de Personas (Arquitectura MVC, POO y MySQL)
+# API de Personas
 
-API REST construida con **Node.js** y **Express** aplicando el patrón arquitectónico **MVC (Modelo - Vista - Controlador)**, principios de **POO (Programación Orientada a Objetos)**, autenticación segura con **JWT** + contraseñas encriptadas con **bcryptjs**, y persistencia real en base de datos relacional **MySQL**.
+Proyecto de Diseño Web: una API REST hecha con Node.js y Express para registrar personas (nombre, apellido, edad y email) y guardarlas en MySQL. Tiene login con JWT y una página sencilla en `public/` para usarla desde el navegador.
 
----
+El código está organizado con MVC y cada parte es una clase (modelos, controladores, middleware y la conexión a la base de datos).
 
-## 🏗️ Arquitectura MVC y POO
+## Estructura
 
 ```
 src/
-  app.js                        # Configuración de Express, middlewares y rutas
-  server.js                     # Clase Server (POO): sincronización con MySQL y escucha
-  config/
-    database.js                 # Clase Database (POO - Singleton): Connection Pool y consultas preparadas
-  models/
-    Persona.js                  # Clase Persona (POO): validaciones y operaciones CRUD en MySQL
-    Usuario.js                  # Clase Usuario (POO): autenticación, hash con bcrypt y tokens JWT
-  controllers/
-    PersonaController.js        # Clase PersonaController (POO): manejo de solicitudes HTTP
-    AuthController.js           # Clase AuthController (POO): registro y login
-  middlewares/
-    AuthMiddleware.js           # Clase AuthMiddleware (POO): protección de rutas con JWT
-  routes/
-    persona.routes.js           # Definición de rutas REST para personas
-    auth.routes.js              # Definición de rutas de autenticación
-public/                         # Capa de Vista (Frontend HTML5 / CSS3 / JavaScript Vanilla)
-  index.html
-  styles.css
-  app.js
-database/
-  schema.sql                    # Script DDL de la base de datos y tablas
-tests/
-  auth.test.js                  # Tests automatizados de autenticación contra MySQL
-  persona.test.js               # Tests automatizados de CRUD contra MySQL
-.env                            # Variables de entorno locales (NO se sube al repositorio)
-.env.example                    # Plantilla de variables de entorno
+  app.js              configuración de Express y rutas
+  server.js           arranca el servidor y prepara la base de datos
+  config/database.js  conexión a MySQL
+  models/             Persona y Usuario
+  controllers/        lógica de cada endpoint
+  middlewares/        verificación del token
+  routes/             rutas de /auth y /personas
+public/               frontend (HTML, CSS y JS)
+database/schema.sql   script para crear la base de datos a mano
+tests/                pruebas con Jest y Supertest
 ```
 
----
+## Cómo correrlo
 
-## ⚙️ Requisitos y Configuración de MySQL
+Necesitas Node.js y un MySQL funcionando (por ejemplo el de XAMPP).
 
-1. Tener un servidor MySQL activo (por ejemplo con **XAMPP**, MariaDB o servicio nativo en el puerto 3306).
-2. Copiar la plantilla y completar tus propios valores:
+1. Instala las dependencias:
+
    ```bash
-   cp .env.example .env
+   npm install
    ```
-   ```env
-   PORT=3000
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USER=tu_usuario_mysql
-   DB_PASSWORD=tu_password_mysql
-   DB_NAME=personas_db
-   JWT_SECRET=<cadena_aleatoria_larga>
-   JWT_EXPIRATION=2h
-   ADMIN_USERNAME=<usuario_admin_opcional>
-   ADMIN_PASSWORD=<password_admin_opcional>
-   ```
-   Para generar un `JWT_SECRET` seguro:
+
+2. Copia `.env.example` a `.env` y llena tus datos de MySQL. También hay que poner un `JWT_SECRET`; se puede generar con:
+
    ```bash
    node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
    ```
 
-> 🔒 El archivo `.env` está en `.gitignore` y **nunca** debe subirse al repositorio.
+   Si pones `ADMIN_USERNAME` y `ADMIN_PASSWORD`, se crea ese usuario la primera vez que arranca el servidor. Si no, te puedes registrar desde la página.
 
-> 💡 **Auto-sincronización:** Al arrancar el servidor con `npm start` o `npm run dev`, la clase `Database` crea automáticamente la base de datos `personas_db` y las tablas `usuarios` y `personas` si aún no existen. Si defines `ADMIN_USERNAME` y `ADMIN_PASSWORD` en `.env`, crea ese usuario administrador inicial; además carga 3 registros iniciales de prueba si la tabla está vacía.
+3. Inicia el servidor:
 
----
+   ```bash
+   npm run dev
+   ```
 
-## 🚀 Instalación y Ejecución
+   Queda en http://localhost:3000. La base de datos y las tablas se crean solas si no existen, y si la tabla de personas está vacía se agregan tres de ejemplo.
+
+Para las pruebas:
 
 ```bash
-# 1. Instalar dependencias
-npm install
-
-# 2. Iniciar en modo desarrollo (con recarga automática)
-npm run dev
-
-# 3. Iniciar en producción
-npm start
-
-# 4. Ejecutar suite de pruebas (26 tests con Jest y Supertest)
 npm test
 ```
 
-El servidor arranca en `http://localhost:3000`.
+Ojo: las pruebas borran los datos de las tablas, así que mejor usar una base de datos aparte para eso.
 
----
+## Endpoints
 
-## 🌐 Interfaz Web
+Autenticación:
 
-Ingresa desde tu navegador a `http://localhost:3000`:
-- **Login / Registro**: Inicia sesión con el administrador que configuraste en `.env` o registra una cuenta nueva.
-- **Panel CRUD**: Crear, listar, buscar por nombre con coincidencia parcial, editar y eliminar personas.
-- **Persistencia**: Todos los cambios se guardan permanentemente en la base de datos MySQL.
+| Método | Ruta | Qué hace |
+|---|---|---|
+| POST | `/auth/registro` | crea un usuario |
+| POST | `/auth/login` | devuelve el token |
 
----
+Personas (hay que mandar el header `Authorization: Bearer <token>`):
 
-## 📡 Endpoints de la API
+| Método | Ruta | Qué hace |
+|---|---|---|
+| GET | `/personas` | lista todas |
+| GET | `/personas/buscar?nombre=...` | busca por nombre |
+| GET | `/personas/:id` | trae una |
+| POST | `/personas` | crea una |
+| PUT | `/personas/:id` | edita una |
+| DELETE | `/personas/:id` | elimina una |
 
-### 🔐 Autenticación (Públicos)
-| Método | Ruta | Descripción | Códigos |
-|---|---|---|---|
-| `POST` | `/auth/registro` | Registrar un usuario (contraseña encriptada con bcrypt) | 201, 400, 409 |
-| `POST` | `/auth/login` | Autenticar credenciales y obtener token JWT | 200, 400, 401 |
+Ejemplo con curl:
 
-### 👥 Personas (Requieren `Authorization: Bearer <token>`)
-| Método | Ruta | Descripción | Códigos |
-|---|---|---|---|
-| `GET` | `/personas` | Listar todas las personas desde MySQL | 200, 401 |
-| `GET` | `/personas/buscar?nombre=...` | Filtrar personas por coincidencia parcial | 200, 400, 401 |
-| `GET` | `/personas/:id` | Obtener persona por su ID | 200, 400, 401, 404 |
-| `POST` | `/personas` | Insertar una nueva persona con validaciones | 201, 400, 401 |
-| `PUT` | `/personas/:id` | Actualizar los datos de una persona | 200, 400, 401, 404 |
-| `DELETE` | `/personas/:id` | Eliminar permanentemente una persona | 204, 400, 401, 404 |
-
----
-
-## 💻 Ejemplos con cURL
-
-### 1. Iniciar sesión y obtener token JWT
 ```bash
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"<TU_USUARIO>","password":"<TU_PASSWORD>"}'
-```
+  -d '{"username":"tu_usuario","password":"tu_password"}'
 
-### 2. Listar todas las personas
-```bash
-curl http://localhost:3000/personas \
-  -H "Authorization: Bearer <TU_TOKEN_JWT>"
-```
-
-### 3. Buscar persona por nombre
-```bash
-curl "http://localhost:3000/personas/buscar?nombre=Juan" \
-  -H "Authorization: Bearer <TU_TOKEN_JWT>"
-```
-
-### 4. Crear una persona
-```bash
-curl -X POST http://localhost:3000/personas \
-  -H "Authorization: Bearer <TU_TOKEN_JWT>" \
-  -H "Content-Type: application/json" \
-  -d '{"nombre":"Laura","apellido":"Sánchez","edad":22,"email":"laura@ejemplo.com"}'
+curl http://localhost:3000/personas -H "Authorization: Bearer <token>"
 ```
