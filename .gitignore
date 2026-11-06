@@ -1,0 +1,33 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+secrets/
+credentials*.json
+
+# Logs y coverage
+logs/
+*.log
+npm-debug.log*
+coverage/
+
+# Bases de datos / volcados locales
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+
+# Editor y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Personas</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header-principal">
+      <h1>👥 Gestión de Personas</h1>
+      <div id="auth-status" class="auth-status" style="display:none;">
+        <span>Conectado como: <strong id="usuario-conectado"></strong></span>
+        <button id="btn-logout" class="btn btn-secondary btn-sm">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <!-- Mensajes globales -->
+    <div id="mensaje" class="mensaje" style="display:none;"></div>
+
+    <!-- Sección de Autenticación (Login / Registro) -->
+    <div id="seccion-auth" class="card">
+      <h2 id="auth-titulo">🔐 Iniciar Sesión</h2>
+      <p class="auth-subtitulo">Inicia sesión con tu cuenta o crea una nueva.</p>
+      
+      <form id="form-auth">
+        <div class="form-grid">
+          <div class="campo">
+            <label for="auth-username">Usuario</label>
+            <input type="text" id="auth-username" placeholder="Nombre de usuario" required>
+          </div>
+          <div class="campo">
+            <label for="auth-password">Contraseña</label>
+            <input type="password" id="auth-password" placeholder="Tu contraseña" required>
+          </div>
+        </div>
+        <div class="form-acciones">
+          <button type="submit" class="btn btn-primary" id="btn-auth-submit">Entrar</button>
+          <button type="button" class="btn btn-secondary" id="btn-toggle-auth">¿No tienes cuenta? Regístrate</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Contenido protegido (Visible solo con sesión activa) -->
+    <div id="contenido-protegido" style="display:none;">
+      <!-- Formulario para crear/editar -->
+      <div class="card">
+        <h2 id="form-titulo">Agregar Persona</h2>
+        <form id="form-persona">
+          <input type="hidden" id="persona-id">
+          <div class="form-grid">
+            <div class="campo">
+              <label for="nombre">Nombre</label>
+              <input type="text" id="nombre" placeholder="Ej: Juan" required>
+            </div>
+            <div class="campo">
+              <label for="apellido">Apellido</label>
+              <input type="text" id="apellido" placeholder="Ej: Pérez" required>
+            </div>
+            <div class="campo">
+              <label for="edad">Edad</label>
+              <input type="number" id="edad" placeholder="Ej: 30" min="0" max="120" required>
+            </div>
+            <div class="campo">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="Ej: juan@correo.com" required>
+            </div>
+          </div>
+          <div class="form-acciones">
+            <button type="submit" class="btn btn-primary" id="btn-guardar">Guardar</button>
+            <button type="button" class="btn btn-secondary" id="btn-cancelar" style="display:none;">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Buscador -->
+      <div class="card">
+        <h2>🔍 Buscar por nombre</h2>
+        <div class="buscar-grupo">
+          <input type="text" id="buscar-nombre" placeholder="Escribe un nombre...">
+          <button class="btn btn-primary" id="btn-buscar">Buscar</button>
+          <button class="btn btn-secondary" id="btn-limpiar">Mostrar todos</button>
+        </div>
+      </div>
+
+      <!-- Tabla de personas -->
+      <div class="card">
+        <h2>📋 Lista de Personas</h2>
+        <div class="tabla-wrapper">
+          <table id="tabla-personas">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Edad</th>
+                <th>Email</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-body">
+              <tr><td colspan="6" class="vacio">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
